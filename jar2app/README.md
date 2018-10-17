@@ -1,0 +1,2 @@
+# jar2app Source Files
+this directory contains the actual jar2app source code, which does the heavy lifting of this application. It was created by Jorl17 on github. <a href="https://github.com/Jorl17/jar2app">click here for the repo.</a>
