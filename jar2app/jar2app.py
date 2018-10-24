@@ -510,7 +510,7 @@ def parse_input():
            options.retina_screen, options.use_screen_menu_bar, options.working_directory, options.executable
 
 def main():
-    print('jar2app %s, João Ricardo Lourenço, 2015-2017 <jorl17.8@gmail.com>.' % VERSION)
+    print(u'jar2app %s, João Ricardo Lourenço, 2015-2017 <jorl17.8@gmail.com>.'  % VERSION)
     print('Github page: https://github.com/Jorl17/jar2app/')
     make_app(*parse_input())
 

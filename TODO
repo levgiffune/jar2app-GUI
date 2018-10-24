@@ -1,0 +1,44 @@
+This is basically just the output of jar2app's help command minus features that have been added because I added literally no functionality except the actual gui:
+
+Options:
+  -n BUNDLE_NAME, --name=BUNDLE_NAME
+                        Package/Bundle name.
+  -d BUNDLE_DISPLAYNAME, --display-name=BUNDLE_DISPLAYNAME
+                        Package/Bundle display name.
+  -b BUNDLE_IDENTIFIER, --bundle-identifier=BUNDLE_IDENTIFIER
+                        Package/Bundle identifier (e.g. com.example.test)
+                        (Default is application name prefix by
+                        com.jar2app.example..
+  -v BUNDLE_VERSION, --version=BUNDLE_VERSION
+                        Package/Bundle version (e.g. 1.0.0) (Default: 1.0.1).
+  -s SHORT_VERSION_STRING, --short-version=SHORT_VERSION_STRING
+                        Package/Bundle short version (see Apple's
+                        documentation on CFBundleShortVersionString) (Default:
+                        1.0.1).
+  -c COPYRIGHT_STR, --copyright=COPYRIGHT_STR
+                        Package/Bundle copyright string (e.g. (c) 2015 Awesome
+                        Person) (Default: empty)
+  -u SIGNATURE, --unique-signature=SIGNATURE
+                        4 Byte unique signature of your application (Default:
+                        ????)
+  -m MAIN_CLASS_NAME, --main-class=MAIN_CLASS_NAME
+                        Jar main class. Blank for auto-detection (usually
+  -j JVM_OPTIONS, --jvm-options=JVM_OPTIONS
+                        Extra JVM options. Place one by one, separated by
+                        spaces, inside single quotes (e.g. -o '-Xmx1024M
+                        -Xms256M'). (Default: None)
+  -a, --no-append-app-to-name
+                        Do not try to append .app to the output file by
+                        default.
+  -l, --low-res-mode    Do not try to report retina-screen capabilities (use
+                        low resolution mode; by default high resolution mode
+                        is used).
+  -o, --use-osx-menubar
+                        Use OSX menu bar instead of Java menu bar (Default:
+                        False).
+  -e EXECUTABLE, --executable-name=EXECUTABLE
+                        Name of the internal executable to launch (Default:
+                        JavaAppLauncher).
+  -w WORKING_DIRECTORY, --working-directory=WORKING_DIRECTORY
+                        Set current working directory (user.dir) on launch
+                        (Default: $APP_ROOT/Contents).
