@@ -109,7 +109,7 @@ class Window(Frame):
 root = Tk()
 
 #size of the window
-root.geometry("1000x500")
+root.geometry("1000x700")
 
 app = Window(root)
 root.mainloop()  
