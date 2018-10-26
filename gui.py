@@ -61,7 +61,6 @@ class Window(Frame):
             if self.jdk_selected == 1:
                 self.jdk_path = tkFileDialog.askdirectory(initialdir = "~",title = "Select jdk to bundle")
                 jdk_path_label.config(text = self.jdk_path)
-                print "h"
                 if self.jdk_path == '':
                     jdkCheckbox.deselect()
                     self.jdk_selected *= -1
