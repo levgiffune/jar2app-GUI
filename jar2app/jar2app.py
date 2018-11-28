@@ -22,6 +22,15 @@
 ## You should have received a copy of the GNU General Public License
 ## along with jar2app.  If not, see <http://www.gnu.org/licenses/>.
 ##
+
+
+## this source code has been edited slightly to make it function as a 
+## module instead of a standalone script. 
+## this modification was done in order to port the script into a 
+## Tkinter GUI in 2018 by Lev Giffune
+
+
+
 from optparse import OptionParser
 import os.path
 import shutil
@@ -302,9 +311,9 @@ def copy_preserve_status(src, dst):
 #------------------------------------------------------------------------------
 def copy_base_files(app_full_path, icon, jar_file, jdk, jdk_isfile, executable):
     if icon:
-        copy_preserve_status(icon,os.path.join(app_full_path, 'Contents', 'Resources'))
-    copy_preserve_status(os.path.join(os.path.dirname(sys.argv[0]), 'jar2app_basefiles', 'Localizable.strings'), os.path.join(app_full_path, 'Contents', 'Resources', 'en.lproj', 'Localizable.strings'))
-    copy_preserve_status(os.path.join(os.path.dirname(sys.argv[0]), 'jar2app_basefiles', 'JavaAppLauncher'), os.path.join(app_full_path, 'Contents', 'MacOS', executable))
+        copy_preserve_status(icon, os.path.join(app_full_path, 'Contents', 'Resources'))
+    copy_preserve_status(os.path.join(os.path.dirname(sys.argv[0]), 'jar2app', 'jar2app_basefiles', 'Localizable.strings'), os.path.join(app_full_path, 'Contents', 'Resources', 'en.lproj', 'Localizable.strings'))
+    copy_preserve_status(os.path.join(os.path.dirname(sys.argv[0]), 'jar2app', 'jar2app_basefiles', 'JavaAppLauncher'), os.path.join(app_full_path, 'Contents', 'MacOS', executable))
     make_executable(os.path.join(app_full_path, 'Contents', 'MacOS', executable))
     copy_preserve_status(jar_file, os.path.join(app_full_path, 'Contents', 'Java', os.path.basename(jar_file)))
     copy_jdk(app_full_path, jdk, jdk_isfile)
@@ -389,10 +398,13 @@ def print_final_file_info(icon, bundle_identifier, bundle_displayname, bundle_na
 # copies files (packing the JDK/JRE) and creates the plist file. In the end,
 # if all went well, it displays summary info.
 #------------------------------------------------------------------------------
-def make_app(jar_file, output='.', icon=None, bundle_identifier=None, bundle_displayname=None, bundle_name=None,
-             bundle_version=None, short_version_string=None, copyright_str=None, main_class_name=None,
-             jvm_arguments=None, jvm_options=None, jdk=None, unique_signature=None, auto_append_app=True,
-             retina_screen=True, use_screen_menu_bar=False, working_directory=None, executable=None):
+def make_app(jar_file, output=None, icon=None, bundle_identifier=DEFAULT_BUNDLE_IDENTIFIER_PREFIX, bundle_displayname=None, bundle_name=None,
+             bundle_version=DEFAULT_VERSION, short_version_string=DEFAULT_VERSION, copyright_str=None, main_class_name=None,
+             jvm_arguments=None, jvm_options=None, jdk=None, unique_signature=DEFAULT_SIGNATURE, auto_append_app=True,
+             retina_screen=True, use_screen_menu_bar=False, working_directory=None, executable=DEFAULT_EXECUTABLE_NAME):
+    print(u'jar2app %s, João Ricardo Lourenço, 2015-2017 <jorl17.8@gmail.com>.'  % VERSION)
+    print('Github page: https://github.com/Jorl17/jar2app/')
+    
     def default_value(d, default):
         return d if d else default
 
@@ -462,56 +474,3 @@ def make_app(jar_file, output='.', icon=None, bundle_identifier=None, bundle_dis
                           jdk_name, retina_screen, use_screen_menu_bar, working_directory, executable)
 
     print("\n{} packaged to {}.".format(jar_file, os.path.abspath(app_full_path)))
-
-def parse_input():
-    parser = OptionParser()
-    parser.add_option('-n', '--name', help='Package/Bundle name.', dest='bundle_name', type='string', default=None)
-    parser.add_option('-d', '--display-name', help='Package/Bundle display name.', dest='bundle_displayname', type='string',default=None)
-    parser.add_option('-i', '--icon',help='Icon (in .icns format). (Default: None)', dest='icon', type='string', default=None)
-    parser.add_option('-b', '--bundle-identifier', help='Package/Bundle identifier (e.g. com.example.test) (Default is application name prefix by {}.'.format(DEFAULT_BUNDLE_IDENTIFIER_PREFIX), dest='bundle_identifier',type='string', default=None)
-    parser.add_option('-v', '--version', help='Package/Bundle version (e.g. 1.0.0) (Default: {}).'.format(DEFAULT_VERSION),dest='bundle_version', type='string', default=DEFAULT_VERSION)
-    parser.add_option('-s', '--short-version', help='Package/Bundle short version (see Apple\'s documentation on CFBundleShortVersionString) (Default: {}).'.format(DEFAULT_VERSION), dest='short_version_string',type='string', default=DEFAULT_VERSION)
-    parser.add_option('-c', '--copyright',help='Package/Bundle copyright string (e.g. (c) 2015 Awesome Person) (Default: empty)',dest='copyright_str', type='string', default=None)
-    parser.add_option('-u', '--unique-signature', help='4 Byte unique signature of your application (Default: {})'.format(DEFAULT_SIGNATURE),dest='signature', type='string', default=DEFAULT_SIGNATURE)
-    parser.add_option('-m', '--main-class', help='Jar main class. Blank for auto-detection (usually right).',dest='main_class_name', type='string', default=None)
-    parser.add_option('-r', '--runtime', help='JRE/JDK runtime to bundle. Can be a folder or a zip file. If none is given, the default on the system is used (default: None)',dest='jdk', type='string', default=None)
-    parser.add_option('-j', '--jvm-options',help='Extra JVM options. Place one by one, separated by spaces, inside single quotes (e.g. -o \'-Xmx1024M -Xms256M\'). (Default: None)',dest='jvm_options', type='string', default=None)
-    parser.add_option('-a', '--no-append-app-to-name', help='Do not try to append .app to the output file by default.', dest='auto_append_name', action='store_false')
-    parser.add_option('-l', '--low-res-mode', help='Do not try to report retina-screen capabilities (use low resolution mode; by default high resolution mode is used).',dest='retina_screen', action='store_false')
-    parser.add_option('-o', '--use-osx-menubar', help='Use OSX menu bar instead of Java menu bar (Default: False).', dest='use_screen_menu_bar', action='store_true')
-    parser.add_option('-e', '--executable-name', help='Name of the internal executable to launch (Default: %s).' % DEFAULT_EXECUTABLE_NAME,
-                      dest='executable', default='JavaAppLauncher')
-    parser.add_option('-w','--working-directory', help='Set current working directory (user.dir) on launch (Default: $APP_ROOT/Contents).', dest='working_directory', type='string', default='$APP_ROOT/Contents')
-
-    (options, args) = parser.parse_args()
-
-    if len(args) == 2:
-        input_file = args[0]
-        output = args[1]
-    elif len(args) > 2:
-        parser.error('Extra arguments provided!')
-    elif len(args) == 1:
-        input_file = args[0]
-        output = None
-    else:
-        parser.error('An input file is needed. Optionally, you can also provide an output file or directory. E.g.\n{} in.jar\n{} in.jar out.app\n{} in.jar out/'.format(sys.argv[0], sys.argv[0], sys.argv[0]) )
-
-    if options.auto_append_name == None:
-        options.auto_append_name = True
-
-    if options.retina_screen == None:
-        options.retina_screen = True
-
-    jvm_arguments = ''
-
-    return input_file, output, options.icon, options.bundle_identifier, options.bundle_displayname, options.bundle_name,\
-           options.bundle_version, options.short_version_string, options.copyright_str, options.main_class_name,\
-           jvm_arguments, options.jvm_options, options.jdk, options.signature, options.auto_append_name,\
-           options.retina_screen, options.use_screen_menu_bar, options.working_directory, options.executable
-
-def main():
-    print(u'jar2app %s, João Ricardo Lourenço, 2015-2017 <jorl17.8@gmail.com>.'  % VERSION)
-    print('Github page: https://github.com/Jorl17/jar2app/')
-    make_app(*parse_input())
-
-main()

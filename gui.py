@@ -1,90 +1,94 @@
+#------------------------------------------------------------------------------
+# imports
+#------------------------------------------------------------------------------
+
+#python3
 try:
     from tkinter import *
     
 except ImportError:
+    #python2
     from Tkinter import *
     import Tkconstants, tkFileDialog
     
-import os, subprocess
+import os, sys
 
-#call command and return output
-def system_call(command):
-    p = subprocess.Popen([command], stdout=subprocess.PIPE, shell=True)
-    return p.stdout.read()
+from jar2app.jar2app import make_app
 
-#append text to label
+#------------------------------------------------------------------------------
+# global variables
+#------------------------------------------------------------------------------
+
+jar_path = ""
+icon_path = ""
+jdk_path = ""
+icon_selected = -1
+jdk_selected = -1
+
+#------------------------------------------------------------------------------
+# utility functions and classes for getting jar2app output
+#------------------------------------------------------------------------------
+
+#append text to Tkinter label
 def append_text(label, text):
     current_value = label.cget("text")
     new_value = current_value + text
     label.config(text=new_value)
+    
+class Output:
+    def __init__(self):
+        self.content = []
+    def write(self, string):
+        self.content.append(string)
+
+#------------------------------------------------------------------------------
+# file browser opening functions
+#------------------------------------------------------------------------------
+
+def open_jar_browser(label):
+    global jar_path
+    path = tkFileDialog.askopenfilename(initialdir = "~", title = "Select icon file to bundle with your app", filetypes = [("jar files","*.jar"),("all files","*.*")])
+    jar_path = path
+    label.config(text = jar_path)
+
+def open_icon_browser(cbox, label):
+    global icon_path, icon_selected
+    icon_path = tkFileDialog.askopenfilename(initialdir = "~", title = "Select icon file to bundle with your app", filetypes = [("Apple icon files","*.icns"),("all files","*.*")])
+    label.config(text = icon_path)
+    if icon_path == '':
+        cbox.deselect()
+
+def open_jdk_browser(cbox, label):
+    global jdk_path, jdk_selected
+    jdk_path = tkFileDialog.askdirectory(initialdir = "~",title = "choose jdk folder")
+    label.config(text = jdk_path)
+    if jdk_path == '':
+        cbox.deselect()
+
+#------------------------------------------------------------------------------
+# invoke jar2app and print output for user
+#------------------------------------------------------------------------------
+
+def invoke_jar2app(jar_file, output, icon, jdk, label):
+    if jar_file:
+        out = Output()
+        sys.stdout = out
+        make_app(jar_file, output=output, icon=icon, jdk=jdk)
+        sys.stdout = sys.__stdout__
+        output = ''.join(out.content)
+        append_text(label, output)
+
+#------------------------------------------------------------------------------
+# master GUI widget
+#------------------------------------------------------------------------------
 
 class Window(Frame):
-
-
+    global jar_path, icon_path, jdk_path
     def __init__(self, master=None):
         Frame.__init__(self, master)
-        self.master = master
-        self.init_window()
-
-    #Creation of init_window
-    def init_window(self):
-        #setup vars
-        self.jar_path = ""
-        self.icon_path = ""
-        self.jdk_path = ""
-        self.icon_selected = -1
-        self.jdk_selected = -1
-        
-        # changing the title of our master widget      
+        self.master = master  
         self.master.title("jar2app GUI")
-
-        # allowing the widget to take the full space of the root window
         self.pack(fill=BOTH, expand=1)
-        
-        #file browser opening functions
-        def open_jar_browser():
-            self.jar_path = tkFileDialog.askopenfilename(initialdir = "~",title = "Select jar file to turn into app",filetypes = [("jar files","*.jar"),("all files","*.*")])
-            jar_path_label.config(text = self.jar_path)
-            
-    
-        def open_icon_browser():
-            self.icon_selected *= -1
-            if self.icon_selected == 1:
-                self.icon_path = tkFileDialog.askopenfilename(initialdir = "~",title = "Select icon file to bundle with your app",filetypes = [("Apple icon files","*.icns"),("all files","*.*")])
-                icon_path_label.config(text = self.icon_path)
-                if self.icon_path == '':
-                    iconCheckbox.deselect()
-                    self.icon_selected *= -1
-    
-        def open_jdk_browser():
-            self.jdk_selected *= -1
-            if self.jdk_selected == 1:
-                self.jdk_path = tkFileDialog.askdirectory(initialdir = "~",title = "Select jdk to bundle")
-                jdk_path_label.config(text = self.jdk_path)
-                if self.jdk_path == '':
-                    jdkCheckbox.deselect()
-                    self.jdk_selected *= -1
-            
-        def make_app():
-            here = os.path.dirname(sys.argv[0])
-            jar2app_files = os.path.join(here, "jar2app")
-            jar2app_executable = os.path.join(jar2app_files, "jar2app.py")
-            if self.jar_path:
-                cmd = ["python", jar2app_executable]
-                if self.icon_path:
-                    cmd.extend(['-i', self.icon_path.replace(' ', '\\ ')])
-                if self.jdk_path:
-                    cmd.extend(['-r', self.icon_path.replace(' ', '\\ ')])
-                cmd.extend([self.jar_path.replace(' ', '\\ '), "~/Desktop/"])
-                cmd = ' '.join(cmd)
-                out = system_call(cmd)
-                append_text(jar2app_output_label, ("\n\n" + out))
-                
-        # creating a buttons and checkboxes
-        openButton = Button(self, text="Choose Jar file to bundle", command=open_jar_browser)
-        iconCheckbox = Checkbutton(self, text="Use Custom icon file (*.icns)", command=open_icon_browser)
-        jdkCheckbox = Checkbutton(self, text="Bundle your own jdk (must be directory)", command=open_jdk_browser)
-        buildButton = Button(self, text="Bundle App", command=make_app)
         
         #paths of bundled files
         jar_path_label = Label(self, text="")
@@ -92,8 +96,16 @@ class Window(Frame):
         jdk_path_label = Label(self, text="")
         
         #output of jar2app
-        jar2app_output_label=Label(self, text="")
+        jar2app_output_label=Label(self, text="Jar2App Output:\n")
         
+        # creating a buttons and checkboxes
+        openButton = Button(self, text="Choose Jar file to bundle")
+        openButton.config(command = lambda: open_jar_browser(jar_path_label))
+        iconCheckbox = Checkbutton(self, text="Use Custom icon file (*.icns)")
+        iconCheckbox.config(command = lambda: open_icon_browser(iconCheckbox, icon_path_label))
+        jdkCheckbox = Checkbutton(self, text="Bundle your own jdk (must be directory)")
+        jdkCheckbox.config(command = lambda: open_jdk_browser(jdkCheckbox, jdk_path_label))
+        buildButton = Button(self, text="Bundle App", command = lambda: invoke_jar2app(jar_path, "/Users/levgiffune/Desktop/", icon_path, jdk_path, jar2app_output_label))
         
         #place labels and buttons
         jar2app_output_label.place(x=50, y=300)
