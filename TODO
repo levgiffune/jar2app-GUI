@@ -22,7 +22,11 @@ Options:
                         4 Byte unique signature of your application (Default:
                         ????)
   -m MAIN_CLASS_NAME, --main-class=MAIN_CLASS_NAME
-                        Jar main class. Blank for auto-detection (usually
+                        Jar main class. Blank for auto-detection (usually right).
+  -r JDK, --runtime=JDK
+                        JRE/JDK runtime to bundle. Can be a folder or a zip
+                        file. If none is given, the default on the system is
+                        used (default: None)
   -j JVM_OPTIONS, --jvm-options=JVM_OPTIONS
                         Extra JVM options. Place one by one, separated by
                         spaces, inside single quotes (e.g. -o '-Xmx1024M
